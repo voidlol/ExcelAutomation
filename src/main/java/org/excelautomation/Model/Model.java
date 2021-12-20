@@ -37,7 +37,7 @@ public class Model {
                 }
             }
             long endReadingTime = System.currentTimeMillis();
-            controller.sendMessage(MessageType.INFO, startReadingTime, endReadingTime);
+            controller.sendMessage(MessageType.READING_TIME, startReadingTime, endReadingTime);
             if (fail) return;
             writeTemplate(template);
         }
@@ -61,7 +61,7 @@ public class Model {
         boolean template = false;
         boolean excelFiles = false;
         if (files == null || files.length < 2) {
-            controller.error(ErrorType.FILE_NOT_FOUND, null, null, 0);
+            controller.error(ErrorType.FILE_NOT_FOUND);
             return false;
         }
         for (File f : files) {
@@ -71,18 +71,18 @@ public class Model {
             } else if (!name.startsWith("~$") && name.endsWith(".xlsx")) {
                 if (!(name.startsWith("и.") || name.startsWith("с.") || name.startsWith("т")
                  || name.startsWith("м.") || name.startsWith("э") || name.startsWith("о."))) {
-                    controller.error(ErrorType.NO_PREFIX_ITEMS, null, null, 0);
+                    controller.error(ErrorType.NO_PREFIX_ITEMS);
                     return false;
                 }
                 excelFiles = true;
             }
         }
         if (!template) {
-            controller.error(ErrorType.TEMPLATE_NOT_FOUND, null, null, 0);
+            controller.error(ErrorType.TEMPLATE_NOT_FOUND);
             return false;
         }
         if (!excelFiles) {
-            controller.error(ErrorType.FILE_NOT_FOUND, null, null, 0);
+            controller.error(ErrorType.FILE_NOT_FOUND);
             return false;
         }
         return true;

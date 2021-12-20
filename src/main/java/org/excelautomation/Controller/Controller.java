@@ -19,8 +19,20 @@ public class Controller {
         exceptionHandler = new ExceptionHandler(this.display);
     }
 
-    public void error(ErrorType ep, String fileName, Row row, int rows) {
-        exceptionHandler.handleError(ep, fileName, row, rows);
+    public void error(ErrorType ep, Exception e) {
+        exceptionHandler.handleError(ep, e);
+    }
+
+    public void error(ErrorType ep, int rows) {
+        exceptionHandler.handleError(ep, rows);
+    }
+
+    public void error(ErrorType ep, String fileName, Row row) {
+        exceptionHandler.handleError(ep, fileName, row.getRowNum() + 1);
+    }
+
+    public void error(ErrorType ep) {
+        exceptionHandler.handleError(ep);
     }
 
     public void init() {

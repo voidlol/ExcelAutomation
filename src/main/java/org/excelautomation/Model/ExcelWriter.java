@@ -45,7 +45,7 @@ public class ExcelWriter {
             Sheet sheet = workbook.getSheet("Спецификация");
             int rowsInFile = sheet.getLastRowNum() - 17;
             if (rowsInFile < overallData.size()) {
-                controller.error(ErrorType.NOT_ENOUGH_ROWS, null, null, overallData.size() + 18);
+                controller.error(ErrorType.NOT_ENOUGH_ROWS, overallData.size() + 18);
                 Thread.sleep(10000);
                 return;
             }
@@ -73,7 +73,7 @@ public class ExcelWriter {
             long endWritingTime = System.currentTimeMillis();
             controller.sendMessage(MessageType.WRITING_TIME, startWritingTime, endWritingTime);
         } catch (IOException | InterruptedException e) {
-            controller.error(ErrorType.IOEXCEPTION, null, null, 0);
+            controller.error(ErrorType.IOEXCEPTION, e);
         }
     }
 }

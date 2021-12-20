@@ -70,12 +70,12 @@ public class ExcelParser {
 
     private void checkCellFormat(Cell cell, int col, Row row, File file) {
         if ((col < 2 || col == 10) && (cell == null || cell.getCellType().compareTo(CellType.BLANK) == 0)) {
-            controller.error((col < 1 ? ErrorType.WRONG_AB_COLUMN : ErrorType.WRONG_K_COLUMN), file.getName(), row, 0);
+            controller.error((col < 1 ? ErrorType.WRONG_AB_COLUMN : ErrorType.WRONG_K_COLUMN), file.getName(), row);
             fail = true;
         }
 
         if (col == 12 && !isNumeric(cell)) {
-            controller.error(ErrorType.WRONG_M_COLUMN, file.getName(), row, 0);
+            controller.error(ErrorType.WRONG_M_COLUMN, file.getName(), row);
             fail = true;
         }
     }
