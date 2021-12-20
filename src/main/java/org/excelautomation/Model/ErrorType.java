@@ -1,0 +1,7 @@
+package org.excelautomation.Model;
+
+public enum ErrorType {
+    FILE_NOT_FOUND, TEMPLATE_NOT_FOUND, NO_PREFIX_ITEMS,
+    WRONG_AB_COLUMN, WRONG_M_COLUMN, WRONG_K_COLUMN,
+    NOT_ENOUGH_ROWS, IOEXCEPTION
+}
