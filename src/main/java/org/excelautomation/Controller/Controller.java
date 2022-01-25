@@ -53,7 +53,17 @@ public class Controller {
     }
 
     public void sendMessage(MessageType mp, String message) {
-        display.println(message);
+        if (mp == MessageType.PROGRESS) {
+            display.print(message);
+        } else {
+            display.println(message, mp);
+        }
+    }
+
+    public void sendMessage(MessageType mp) {
+        if (mp == MessageType.BLANK) {
+            display.print("\n");
+        }
     }
 
     public void sendMessage(MessageType mp, long start, long end) {
@@ -61,6 +71,10 @@ public class Controller {
             case READING_TIME -> display.println("ЧТЕНИЕ ЗАНЯЛО: " + getTime(start, end), MessageType.INFO);
             case WRITING_TIME -> display.println("ЗАПИСЬ ЗАНЯЛА: " + getTime(start, end), MessageType.INFO);
         }
+    }
+
+    public void sendMessage(MessageType mp, Row row, int size) {
+        display.print("\rПерерасчет формул: строка " + (row.getRowNum()) + "/" + size + ".", mp);
     }
 
     private String getTime(long start, long end) {

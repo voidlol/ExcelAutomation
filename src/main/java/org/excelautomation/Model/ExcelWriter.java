@@ -74,7 +74,7 @@ public class ExcelWriter implements Runnable {
             for (Map<Integer, String> rowData : overallData) {
                 Row row = sheet.getRow(startRow++);
                 progress++;
-                System.out.print("\rЗапись строки: " + getProgress());
+                controller.sendMessage(MessageType.PROGRESS, "\rЗапись строки: " + getProgress());
                 if (controller.config.getIS_ADDING()) {
                     for (int i : nullableCells.keySet()) {
                         if (!rowData.containsKey(i)) {
@@ -105,15 +105,15 @@ public class ExcelWriter implements Runnable {
                     }
                 }
             }
-            System.out.print("\n");
+            controller.sendMessage(MessageType.BLANK);
             for (Row row : sheet) {
-                System.out.print("\rПерерасчет формул: строка " + (row.getRowNum()) + "/" + (overallData.size()));
+                controller.sendMessage(MessageType.INFO, row, overallData.size());
                 if (row.getRowNum() == overallData.size()) break;
                 for (Cell cell : row) {
                     if (formulaCells.contains(cell.getColumnIndex() + 1)) evaluator.evaluateFormulaCell(cell);
                 }
             }
-            System.out.print("\n");
+            controller.sendMessage(MessageType.BLANK);
             try (FileOutputStream outputStream = new FileOutputStream(file)) {
                 workbook.write(outputStream);
             }
