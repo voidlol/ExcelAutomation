@@ -1,25 +1,30 @@
 package org.excelautomation.Model;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.excelautomation.Controller.Controller;
 
 public class ExcelParser {
 
     private boolean fail = false;
     private final Controller controller;
+    private final int TEMPLATE_COLUMNS;
+    private static final int SPECS_COLUMNS = 14;
+    private final Set<Integer> cellsToSkip = new HashSet<>();
 
     public ExcelParser(Controller controller) {
         this.controller = controller;
+        TEMPLATE_COLUMNS = controller.config.getATTRIBUTE();
+        Integer[] cellsToSkipArray = { 19, 20, 21, 28, 30, 33, 39, 42, 43 };
+        cellsToSkip.addAll(Arrays.asList(cellsToSkipArray));
     }
 
     private boolean isNumeric(Cell cell) {
@@ -27,45 +32,65 @@ public class ExcelParser {
             return true;
         }
         try {
-            double d = cell.getNumericCellValue();
+            cell.getNumericCellValue();
         } catch (IllegalStateException nfe) {
             return false;
         }
         return true;
     }
 
-    public Map<Integer, List<String>> readExcel(File file) {
-        Map<Integer, List<String>> data = new HashMap<>();
-        try (FileInputStream fis = new FileInputStream(file);
-             Workbook workbook = new XSSFWorkbook(fis)) {
-
-            Sheet sheet = workbook.getSheetAt(0);
-            int i = 0;
+    public List<Map<Integer, String>> readExcelFile(File file, boolean isTemplate) {
+        ZipSecureFile.setMinInflateRatio(0);
+        List<Map<Integer, String>> data = new ArrayList<>();
+        try (Workbook workbook = new XSSFWorkbook(file)) {
+            int startColumn = isTemplate ? 1 : 0;
+            Sheet sheet;
+            if (isTemplate) {
+                sheet = workbook.getSheet("Спецификация");
+            }
+            else sheet = workbook.getSheetAt(0);
+            int columnsToRead = isTemplate ? TEMPLATE_COLUMNS : SPECS_COLUMNS;
             for (Row row : sheet) {
-                data.put(i, new ArrayList<String>());
-                for (int j = 0; j < 14; j++) {
+                if (isTemplate) {
+                    if (row.equals(sheet.getRow(0)) || row.getRowNum() > sheet.getLastRowNum() - 16) continue;
+                    if (row.getCell(1).getCellType() == CellType.BLANK && row.getCell(2).getCellType() == CellType.BLANK)
+                        break;
+                }
+                Map<Integer, String> rowData = new HashMap<>();
+                for (int j = startColumn; j < columnsToRead; j++) {
                     Cell cell = row.getCell(j);
-                    checkCellFormat(cell, j, row, file);
-                    if (cell == null) {
-                        data.get(i).add("!EMPTY!");
-                        continue;
-                    }
-                    switch (cell.getCellType()) {
-                        case STRING -> data.get(i).add(String.valueOf(cell.getRichStringCellValue()));
-                        case NUMERIC -> data.get(i).add(String.valueOf(cell.getNumericCellValue()));
-                        case BLANK -> data.get(i).add("!EMPTY!");
+                    int index = j;
+                    if (cell != null) {
+                        if (!isTemplate) {
+                            checkCellFormat(cell, j, row, file);
+                            index = getIndex(j);
+                        }
+                        if (isTemplate && cellsToSkip.contains(j + 1)) continue;
+                        switch (cell.getCellType()) {
+                            case STRING -> rowData.put(index, String.valueOf(cell.getRichStringCellValue()));
+                            case FORMULA -> rowData.put(index, cell.getCellFormula());
+                            case NUMERIC -> rowData.put(index, String.valueOf(cell.getNumericCellValue()));
+                        }
                     }
                 }
-                data.get(i).add(String.valueOf(file.getName().charAt(0)));
-                i++;
+                if (!isTemplate) rowData.put(getIndex(14), String.valueOf(file.getName().charAt(0)));
+                data.add(rowData);
             }
         } catch (FileNotFoundException e) {
             System.err.println("FILE NOT FOUND: " + file);
-        } catch (IOException e) {
+        } catch (IOException | InvalidFormatException e) {
             e.printStackTrace();
         }
 
         return fail ? null : data;
+    }
+
+    private int getIndex(int j) {
+        if (j < 2) return j + 1;
+        else if (j <= 12) return j + 5;
+        else if (j == 13) return 34;
+        else if (j == 14) return controller.config.getATTRIBUTE() - 1;
+        return 0;
     }
 
     private void checkCellFormat(Cell cell, int col, Row row, File file) {
@@ -79,5 +104,6 @@ public class ExcelParser {
             fail = true;
         }
     }
+
 
 }

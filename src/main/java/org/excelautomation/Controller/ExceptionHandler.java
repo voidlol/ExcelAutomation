@@ -1,6 +1,5 @@
 package org.excelautomation.Controller;
 
-import org.apache.poi.ss.usermodel.Row;
 import org.excelautomation.Model.ErrorType;
 import org.excelautomation.Model.MessageType;
 import org.excelautomation.View.View;
@@ -23,8 +22,8 @@ public class ExceptionHandler {
     }
 
     public void handleError(ErrorType ep, int rows) {
-        switch (ep) {
-            case NOT_ENOUGH_ROWS -> display.println("НЕДОСТАТОЧНО СТРОК. ДОЛЖНО БЫТЬ: " + rows, MessageType.ERROR);
+        if (ep == ErrorType.NOT_ENOUGH_ROWS) {
+            display.println("НЕДОСТАТОЧНО СТРОК. ДОЛЖНО БЫТЬ: " + rows, MessageType.ERROR);
         }
     }
 
