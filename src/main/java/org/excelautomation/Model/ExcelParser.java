@@ -16,13 +16,14 @@ public class ExcelParser {
 
     private boolean fail = false;
     private final Controller controller;
-    private static final int TEMPLATE_COLUMNS = 43;
+    private final int TEMPLATE_COLUMNS;
     private static final int SPECS_COLUMNS = 14;
     private final Set<Integer> cellsToSkip = new HashSet<>();
 
     public ExcelParser(Controller controller) {
         this.controller = controller;
-        Integer[] cellsToSkipArray = { 19, 20, 21, 29, 30, 32, 38, 41, 42 };
+        TEMPLATE_COLUMNS = controller.config.getATTRIBUTE();
+        Integer[] cellsToSkipArray = { 19, 20, 21, 28, 30, 33, 39, 42, 43 };
         cellsToSkip.addAll(Arrays.asList(cellsToSkipArray));
     }
 
@@ -87,8 +88,8 @@ public class ExcelParser {
     private int getIndex(int j) {
         if (j < 2) return j + 1;
         else if (j <= 12) return j + 5;
-        else if (j == 13) return 33;
-        else if (j == 14) return 42;
+        else if (j == 13) return 34;
+        else if (j == 14) return controller.config.getATTRIBUTE() - 1;
         return 0;
     }
 

@@ -2,10 +2,12 @@ package org.excelautomation.Controller;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.excelautomation.Model.ErrorType;
+import org.excelautomation.Model.ExcelCheckInvoice;
 import org.excelautomation.Model.MessageType;
 import org.excelautomation.Model.Model;
 import org.excelautomation.View.View;
 
+import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 public class Controller {
@@ -37,15 +39,21 @@ public class Controller {
     }
 
     public void init() {
-        sendMessage(MessageType.INFO, "Working template: " + config.getWORKING_TEMPLATE()
-                                            + "\nEmpty Template: " + config.getEMPTY_TEMPLATE()
-                                            + "\nAre we adding? " + (config.getIS_ADDING() ? "YES" : "NO"));
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (config.isCHECKING()) {
+            sendMessage(MessageType.INFO, "Проверяем файл: " + config.getWORKING_TEMPLATE());
+            ExcelCheckInvoice excelCheckInvoice = new ExcelCheckInvoice(this);
+            excelCheckInvoice.check(new File(config.getWORKING_TEMPLATE()));
+        } else {
+            sendMessage(MessageType.INFO, "Working template: " + config.getWORKING_TEMPLATE());
+            sendMessage(MessageType.INFO, "Empty Template: " + config.getEMPTY_TEMPLATE());
+            sendMessage(MessageType.INFO, "Are we adding? " + (config.getIS_ADDING() ? "YES" : "NO"));
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            model.readFolder(config.getIS_ADDING());
         }
-        model.readFolder(config.getIS_ADDING());
     }
 
     public void sendMessage(MessageType mp, String fileName, int count) {

@@ -51,7 +51,7 @@ public class Model {
     }
 
     private void writeTemplate(File template) {
-        overallData.sort(Comparator.comparing(l -> l.get(42)));
+        overallData.sort(Comparator.comparing(l -> l.get(controller.config.getATTRIBUTE() - 1)));
         excelWriter.doMerge(overallData, template);
     }
 
